@@ -1,0 +1,12 @@
+1. item
+	some text
+1. item
+	* item
+		some text
+	* item
+		- item
+		- item
+	* item
+		some text
+1. item
+	some text
