@@ -73,3 +73,16 @@ module Heap where
                         ll       = if downTree == 0 then snd down else l
                         rr       = if downTree == 1 then snd down else r
 
+    heapSort :: Ord a => [a] -> [a]
+    heapSort xs = sortHeap $ buildHeap xs
+
+    buildHeap :: Ord a => [a] -> MinHeap a
+    buildHeap xs = foldr insert emptyMinHeap xs
+
+    sortHeap :: Ord a => MinHeap a -> [a]
+    sortHeap x = snd $ _sort (x, [])
+        where
+            _sort :: Ord a => (MinHeap a, [a]) -> (MinHeap a, [a])
+            _sort i@(heap, xs) = case (getMin heap) of
+                Nothing -> i
+                Just x  -> _sort (deleteMin heap, x : xs)
