@@ -50,32 +50,54 @@ public:
 		}
 	}
 
+	static
 	BinTreeNode<T> *
-	attach(BinTreeNode<T> *parent, BinTreeNode<T> **parent_ref) {
+	attach(BinTreeNode<T> *node, BinTreeNode<T> *parent, BinTreeNode<T> **parent_ref) {
 		BinTreeNode<T> *old = *parent_ref;
 		if (old) {
 			old->unattach();
 		}
-		if (this->parent_ref()) {
-			*this->parent_ref() = nullptr;
+		if (node) {
+			if (node->parent_ref()) {
+				*node->parent_ref() = nullptr;
+			}
+			node->parent() = parent;
+			node->parent_ref() = parent_ref;
 		}
-		this->parent() = parent;
-		this->parent_ref() = parent_ref;
-		*this->parent_ref() = this;
+		*parent_ref = node;
 		return old;
+	}
+
+	static
+	BinTreeNode<T> *
+	unattach(BinTreeNode<T> *node) {
+		if (node) {
+			node->parent() = nullptr;
+			*node->parent_ref() = nullptr;
+			node->parent_ref() = nullptr;
+		}
+		return node;
+	}
+
+	static
+	BinTreeNode<T> *
+	replace(BinTreeNode<T> *repl, BinTreeNode<T> *node) {
+		return BinTreeNode<T>::attach(repl, node->parent(), node->parent_ref());
+	}
+
+	BinTreeNode<T> *
+	attach(BinTreeNode<T> *parent, BinTreeNode<T> **parent_ref) {
+		return BinTreeNode<T>::attach(this, parent, parent_ref);
 	}
 
 	BinTreeNode<T> *
 	unattach() {
-		this->parent() = nullptr;
-		*this->parent_ref() = nullptr;
-		this->parent_ref() = nullptr;
-		return this;
+		return BinTreeNode<T>::unattach(this);
 	}
 
 	BinTreeNode<T> *
 	replace(BinTreeNode<T> *node) {
-		return attach(node->parent(), node->parent_ref());
+		return BinTreeNode<T>::replace(this, node);
 	}
 protected:
 	T _value;

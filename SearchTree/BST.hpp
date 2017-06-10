@@ -63,20 +63,11 @@ public:
 			if ((*parent_ref)->right()) {
 				BinTreeNode<T> *non_leaf = succ(*parent_ref).second, *non_leaf_parent = non_leaf->parent();
 				(*parent_ref)->value() = non_leaf->value();
-				if (non_leaf->right()) {
-					delete non_leaf->right()->replace(non_leaf);
-				} else {
-					delete non_leaf->unattach();
-				}
+				delete BinTreeNode<T>::replace(non_leaf->right(), non_leaf);
 				non_leaf_parent->update();
 				return non_leaf_parent;
-			} else if ((*parent_ref)->left()) {
-				delete (*parent_ref)->left()->replace(*parent_ref);
-				(*parent_ref)->update();
-				return *parent_ref;
 			} else {
-				delete (*parent_ref)->unattach();
-				parent->update();
+				delete BinTreeNode<T>::replace((*parent_ref)->left(), *parent_ref);
 				return parent;
 			}
 		}
