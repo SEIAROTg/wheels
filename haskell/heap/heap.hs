@@ -4,7 +4,7 @@ module Heap where
     data MinHeap a = MinHeap Int (Node a)
 
     showWithIndent :: Show a => Int -> Node a -> String
-    showWithIndent n Empty = indent ++ "Empty\n"
+    showWithIndent n Empty = ""
         where indent = replicate n ' '
     showWithIndent n (Node v l r) = indent ++ (show v) ++ "\n" ++ (showWithIndent nextN l) ++ (showWithIndent nextN r)
         where
@@ -15,6 +15,7 @@ module Heap where
         show x = showWithIndent 0 x
 
     instance Show a => Show (MinHeap a) where
+        show (MinHeap n Empty) = "Empty"
         show (MinHeap n node) = "MinHeap " ++ (show n) ++ "\n\n" ++ (show node)
 
     emptyMinHeap :: MinHeap a
