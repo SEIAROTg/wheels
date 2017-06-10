@@ -8,86 +8,30 @@ template <class T>
 class BST : public BinTree<T> {
 protected:
 	std::pair<
-		BinTreeNode<T> **, // node
-		BinTreeNode<T> **  // parent of match
+		BinTreeNode<T> **, // parent_ref of match
+		BinTreeNode<T> *   // parent of match
 	>
 	_search(const T &key) {
-		BinTreeNode<T> **node = &this->root(), **parent=node;
-		while (*node && (*node)->value() != key) {
-			parent = node;
-			node = key < (*node)->value() ? &(*node)->left() : &(*node)->right();
+		BinTreeNode<T> **parent_ref = &this->root(), *parent=nullptr;
+		while (*parent_ref && (*parent_ref)->value() != key) {
+			parent = *parent_ref;
+			parent_ref = key < parent->value() ? &parent->left() : &parent->right();
 		}
-		return std::make_pair(node, parent);
+		return std::make_pair(parent_ref, parent);
 	}
 
 	std::pair<
-		BinTreeNode<T> **, // node
-		BinTreeNode<T> **  // parent of match
+		BinTreeNode<T> **, // parent_ref of leaf
+		BinTreeNode<T> *   // parent of leaf
 	>
-	succ(BinTreeNode<T> **node) {
-		BinTreeNode<T> **cursor = &(*node)->right();
-		if (!*cursor) {
-			return std::make_pair(cursor, node);
-		} else {
-			while (*cursor) {
-				node = cursor;
-				cursor = &(*cursor)->left();
-			}
-			return std::make_pair(cursor, node);
+	succ(BinTreeNode<T> *parent) {
+		BinTreeNode<T> **parent_ref = &parent->right();
+		while (*parent_ref) {
+			parent = *parent_ref;
+			parent_ref = &parent->left();
 		}
+		return std::make_pair(parent_ref, parent);
 	}
-
-
-	// BinTreeNode<T> *&
-	// move_to_leaf(BinTreeNode<T> *const &node, BinTreeNode<T> *&parent) {
-	// 	if (!node) {
-	// 		return node;
-	// 	}
-	// 	BinTreeNode<T> **cursor = &node->right();
-	// 	while (*cursor) {
-	// 		parent = *cursor;
-	// 		cursor = &(*cursor)->left();
-	// 	}
-	// 	return *cursor;
-	// }
-
-
-	// std::pair<
-	// 	std::reference_wrapper<BinTreeNode<T>*>, // succ leaf
-	// 	std::reference_wrapper<BinTreeNode<T>*>  // parent of succ leaf
-	// >
-	// succ(BinTreeNode<T> *const &node, BinTreeNode<T> *const &parent) {
-	// 	BinTreeNode<T> **cursor = &node->right();
-	// 	if (!*cursor) {
-	// 		return make_pair(node->right(), parent);
-	// 	}
-	// }
-
-	// BinTreeNode<T> *&
-	// succ_node(BinTreeNode<T> *const &node) {
-	// 	BinTreeNode<T> **cursor = &node->right();
-	// 	if (!*cursor) {
-	// 		return node->parent();
-	// 	} else {
-	// 		while ((*cursor)->left()) {
-	// 			cursor = &(*cursor)->left();
-	// 		}
-	// 		return *cursor;
-	// 	}
-	// }
-
-	// BinTreeNode<T> *&
-	// succ_leaf(BinTreeNode<T> *const &node) {
-	// 	BinTreeNode<T> **cursor = &node->right();
-	// 	if (!*cursor) {
-	// 		return *cursor;
-	// 	} else {
-	// 		while (*cursor) {
-	// 			cursor = &(*cursor)->left();
-	// 		}
-	// 		return *cursor;
-	// 	}
-	// }
 
 public:
 	BinTreeNode<T> *
@@ -98,41 +42,42 @@ public:
 	virtual
 	BinTreeNode<T> *
 	insert(const T &key) {
-		BinTreeNode<T> **node, **parent;
-		std::tie(node, parent) = _search(key);
-		if (*node) {
-			std::tie(node, parent) = succ(node);
+		BinTreeNode<T> **parent_ref, *parent;
+		std::tie(parent_ref, parent) = _search(key);
+		if (*parent_ref) {
+			std::tie(parent_ref, parent) = succ(*parent_ref);
 		}
-		*node = new BinTreeNode<T>(key, *parent);
-		if (*parent) {
-			(*parent)->update();
+		(new BinTreeNode<T>(key))->attach(parent, parent_ref);
+		if (parent) {
+			parent->update();
 		}
-		return *node;
+		return *parent_ref;
 	}
 
 	virtual
 	BinTreeNode<T> *
 	remove(const T &key) {
-		BinTreeNode<T> **node, **parent;
-		std::tie(node, parent) = _search(key);
-		if (*node) {
-			if ((*node)->right()) {
-				parent = succ(node).second;
-				(*node)->value((*parent)->value());
-				if ((*parent)->right()) {
-					(*parent)->right()->parent() = (*parent)->parent();
+		BinTreeNode<T> **parent_ref, *parent;
+		std::tie(parent_ref, parent) = _search(key);
+		if (*parent_ref) {
+			if ((*parent_ref)->right()) {
+				BinTreeNode<T> *non_leaf = succ(*parent_ref).second, *non_leaf_parent = non_leaf->parent();
+				(*parent_ref)->value() = non_leaf->value();
+				if (non_leaf->right()) {
+					delete non_leaf->right()->replace(non_leaf);
+				} else {
+					delete non_leaf->unattach();
 				}
-				*parent = (*parent)->right();
-				(*parent)->update();
-				return *parent;
+				non_leaf_parent->update();
+				return non_leaf_parent;
+			} else if ((*parent_ref)->left()) {
+				delete (*parent_ref)->left()->replace(*parent_ref);
+				(*parent_ref)->update();
+				return *parent_ref;
 			} else {
-				BinTreeNode<T> *left = (*node)->left();
-				delete *node;
-				*node = left;
-				if (*parent) {
-					(*parent)->update();
-					return *parent;
-				}
+				delete (*parent_ref)->unattach();
+				parent->update();
+				return parent;
 			}
 		}
 		return nullptr;

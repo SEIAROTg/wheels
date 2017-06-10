@@ -7,33 +7,9 @@
 template <class T>
 class BinTreeNode {
 public:
-	BinTreeNode(const T &value) : BinTreeNode(value, nullptr) {}
+	BinTreeNode(const T &value) : _value(value), _height(1) {}
 
-	BinTreeNode(const T &value, BinTreeNode<T> *parent) :
-		_value(value),
-		_parent(parent),
-		_left(nullptr),
-		_right(nullptr),
-		_height(1)
-		{}
-
-	~BinTreeNode() {
-		// std::stack<BinTreeNode<T>*> to_delete;
-		// to_delete.push(this);
-		// while (to_delete.size()) {
-		// 	BinTreeNode<T> *top = to_delete.top();
-		// 	to_delete.pop();
-		// 	if (top->left()) {
-		// 		to_delete.push(top->left());
-		// 	}
-		// 	if (top->right()) {
-		// 		to_delete.push(top->right());
-		// 	}
-		// 	delete top;
-		// }
-	};
-
-	const T &
+	T &
 	value() {
 		return _value;
 	}
@@ -53,6 +29,11 @@ public:
 		return _right;
 	}
 
+	BinTreeNode<T> **&
+	parent_ref() {
+		return _parent_ref;
+	}
+
 	int
 	height() {
 		return _height;
@@ -68,9 +49,37 @@ public:
 			node = node->parent();
 		}
 	}
+
+	BinTreeNode<T> *
+	attach(BinTreeNode<T> *parent, BinTreeNode<T> **parent_ref) {
+		BinTreeNode<T> *old = *parent_ref;
+		if (old) {
+			old->unattach();
+		}
+		if (this->parent_ref()) {
+			*this->parent_ref() = nullptr;
+		}
+		this->parent() = parent;
+		this->parent_ref() = parent_ref;
+		*this->parent_ref() = this;
+		return old;
+	}
+
+	BinTreeNode<T> *
+	unattach() {
+		this->parent() = nullptr;
+		*this->parent_ref() = nullptr;
+		this->parent_ref() = nullptr;
+		return this;
+	}
+
+	BinTreeNode<T> *
+	replace(BinTreeNode<T> *node) {
+		return attach(node->parent(), node->parent_ref());
+	}
 protected:
 	T _value;
-	BinTreeNode<T> *_parent, *_left, *_right;
+	BinTreeNode<T> *_parent = nullptr, *_left = nullptr, *_right = nullptr, **_parent_ref = nullptr;
 	int _height;
 };
 
