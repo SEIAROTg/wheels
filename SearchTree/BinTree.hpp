@@ -4,32 +4,32 @@
 #include <stack>
 #include <algorithm>
 
-template <class T>
-class BinTreeNode {
+template <class T, class Derived>
+class BinTreeNodeBase {
 public:
-	BinTreeNode(const T &value) : _value(value), _height(1) {}
+	BinTreeNodeBase(const T &value) : _value(value), _height(1) {}
 
 	T &
 	value() {
 		return _value;
 	}
 
-	BinTreeNode<T> *&
+	Derived *&
 	parent() {
 		return _parent;
 	}
 
-	BinTreeNode<T> *&
+	Derived *&
 	left() {
 		return _left;
 	}
 
-	BinTreeNode<T> *&
+	Derived *&
 	right() {
 		return _right;
 	}
 
-	BinTreeNode<T> **&
+	Derived **&
 	parent_ref() {
 		return _parent_ref;
 	}
@@ -41,7 +41,7 @@ public:
 
 	void
 	update() {
-		BinTreeNode<T> *node = this;
+		Derived *node = reinterpret_cast<Derived *>(this);
 		while (node) {
 			node->_height = std::max(
 				node->left() ? node->left()->height() : 0, node->right() ? node->right()->height() : 0
@@ -51,9 +51,9 @@ public:
 	}
 
 	static
-	BinTreeNode<T> *
-	attach(BinTreeNode<T> *node, BinTreeNode<T> *parent, BinTreeNode<T> **parent_ref) {
-		BinTreeNode<T> *old = *parent_ref;
+	Derived *
+	attach(Derived *node, Derived *parent, Derived **parent_ref) {
+		Derived *old = *parent_ref;
 		if (old) {
 			old->unattach();
 		}
@@ -69,8 +69,8 @@ public:
 	}
 
 	static
-	BinTreeNode<T> *
-	unattach(BinTreeNode<T> *node) {
+	Derived *
+	unattach(Derived *node) {
 		if (node) {
 			node->parent() = nullptr;
 			*node->parent_ref() = nullptr;
@@ -80,43 +80,48 @@ public:
 	}
 
 	static
-	BinTreeNode<T> *
-	replace(BinTreeNode<T> *repl, BinTreeNode<T> *node) {
-		return BinTreeNode<T>::attach(repl, node->parent(), node->parent_ref());
+	Derived *
+	replace(Derived *repl, Derived *node) {
+		return attach(repl, node->parent(), node->parent_ref());
 	}
 
-	BinTreeNode<T> *
-	attach(BinTreeNode<T> *parent, BinTreeNode<T> **parent_ref) {
-		return BinTreeNode<T>::attach(this, parent, parent_ref);
+	Derived *
+	attach(Derived *parent, Derived **parent_ref) {
+		return attach(reinterpret_cast<Derived *>(this), parent, parent_ref);
 	}
 
-	BinTreeNode<T> *
+	Derived *
 	unattach() {
-		return BinTreeNode<T>::unattach(this);
+		return unattach(reinterpret_cast<Derived *>(this));
 	}
 
-	BinTreeNode<T> *
-	replace(BinTreeNode<T> *node) {
-		return BinTreeNode<T>::replace(this, node);
+	Derived *
+	replace(Derived *node) {
+		return replace(reinterpret_cast<Derived *>(this), node);
 	}
 protected:
 	T _value;
-	BinTreeNode<T> *_parent = nullptr, *_left = nullptr, *_right = nullptr, **_parent_ref = nullptr;
+	Derived *_parent = nullptr, *_left = nullptr, *_right = nullptr, **_parent_ref = nullptr;
 	int _height;
 };
 
 template <class T>
+class BinTreeNode : public BinTreeNodeBase<T, BinTreeNode<T>> {
+	using BinTreeNodeBase<T, BinTreeNode<T>>::BinTreeNodeBase;
+};
+
+template <class T, class Node = BinTreeNode<T>>
 class BinTree {
 public:
-	virtual BinTreeNode<T> *search(const T &) = 0;
-	virtual BinTreeNode<T> *insert(const T &) = 0;
-	virtual BinTreeNode<T> *remove(const T &) = 0;
-	BinTreeNode<T> *&root() { return _root; }
+	virtual Node *search(const T &) = 0;
+	virtual Node *insert(const T &) = 0;
+	virtual Node *remove(const T &) = 0;
+	Node *&root() { return _root; }
 	int height() {
 		return root() ? root()->height() : 0;
 	}
 private:
-	BinTreeNode<T> *_root = nullptr;
+	Node *_root = nullptr;
 };
 
 #endif
