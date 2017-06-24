@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Render Test</title>
+</head>
+<body>
+	<app></app>
+
+	<template id="template">
+		<div>
+			<div>num: {{num}}</div>
+			<div>str: {{str}}</div>
+			<div>current time: {{time}}</div>
+		</div>
+	</template>
+
+	<script src="../lib/biubiu.js"></script>
+	<script>
+		new Biubiu({
+			el: 'app',
+			template: '#template',
+			data: {
+				num: 123,
+				str: 'asdf',
+				time: '',
+			},
+			mounted() {
+				console.log('mounted');
+				function update() {
+					this.time = new Date();
+				}
+				setInterval(() => this.updateTime(), 1000);
+				this.updateTime();
+			},
+			methods: {
+				updateTime() {
+					this.time = new Date();
+				}
+			}
+		});
+	</script>
+</body>
+</html>
