@@ -58,7 +58,13 @@ export default function watch(vm, data, computeds = {}, anonymousComputeds, bind
 				const oldNotifierCleaners = notifierClearers;
 				notifier = update;
 				notifierClearers = _notifierClearers;
-				const value = func.call(vm);
+				let value;
+				try {
+					value = func.call(vm);
+				} catch (e) {
+					console.error(e);
+					value = '';
+				}
 				notifier = oldNotifier;
 				notifierClearers = oldNotifierCleaners;
 				ready = true;
@@ -87,7 +93,13 @@ export default function watch(vm, data, computeds = {}, anonymousComputeds, bind
 				const oldNotifierCleaners = notifierClearers;
 				notifier = update;
 				notifierClearers = _notifierClearers;
-				const value = func.call(vm);
+				let value;
+				try {
+					value = func.call(vm);
+				} catch (e) {
+					console.error(e);
+					value = '';
+				}
 				notifier = oldNotifier;
 				notifierClearers = oldNotifierCleaners;
 				bindEls[id].textContent = value;

@@ -11,6 +11,7 @@
 			<div>num: {{num}}</div>
 			<div>str: {{str}}</div>
 			<div>current time: {{time}}</div>
+			<div>current seconds: {{time.getSeconds()}}</div>
 		</div>
 	</template>
 
@@ -22,13 +23,10 @@
 			data: {
 				num: 123,
 				str: 'asdf',
-				time: '',
+				time: null,
 			},
 			mounted() {
 				console.log('mounted');
-				function update() {
-					this.time = new Date();
-				}
 				setInterval(() => this.updateTime(), 1000);
 				this.updateTime();
 			},
