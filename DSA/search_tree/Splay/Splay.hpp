@@ -1,7 +1,7 @@
 #ifndef HEADER_SPLAY
 #define HEADER_SPLAY
 
-#include "BST.hpp"
+#include "../BST/BST.hpp"
 
 template <class T, class Node = BinTreeNode<T>>
 class Splay : public BST<T, Node> {

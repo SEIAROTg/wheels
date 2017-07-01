@@ -2,7 +2,7 @@
 #define HEADER_BST
 
 #include <tuple>
-#include "BinTree.hpp"
+#include "../BinTree/BinTree.hpp"
 
 template <class T, class Node = BinTreeNode<T>>
 class BST : public BinTree<T, Node> {
@@ -34,6 +34,7 @@ protected:
 	}
 
 public:
+	virtual
 	Node *
 	search(const T &key) {
 		return *_search(key).first;

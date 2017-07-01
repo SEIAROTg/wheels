@@ -1,7 +1,7 @@
 #ifndef HEADER_AVL
 #define HEADER_AVL
 
-#include "BST.hpp"
+#include "../BST/BST.hpp"
 
 template <class T>
 class AVLNode : public BinTreeNodeBase<T, AVLNode<T>> {
