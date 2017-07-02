@@ -1,3 +1,5 @@
+#include "Heap/Heap.hpp"
+
 template <class T>
 bool check_ordered(Heap<T> &heap) {
 	if (!heap.size()) {
@@ -15,3 +17,4 @@ bool check_ordered(Heap<T> &heap) {
 	}
 	return true;
 }
+
