@@ -24,23 +24,23 @@ const std::string get_indent(int indent, POS pos) {
 	return ret;
 }
 
-template <class T>
-void display(BinTree<T> &x) {
+template <class Node>
+void display(Node *root) {
 	std::stack<
 		std::tuple<
-			BinTreeNode<T> *,
+			Node *,
 			int,
 			POS
 		>
 	> to_display;
-	if (!x.root()) {
+	if (!root) {
 		std::cout << "EMPTY" << std::endl;
 	} else {
-		to_display.push(std::make_tuple(x.root(), 0, ROOT));
+		to_display.push(std::make_tuple(root, 0, ROOT));
 		while (to_display.size()) {
 			auto top = to_display.top();
 			to_display.pop();
-			BinTreeNode<T> *node;
+			Node *node;
 			int indent;
 			POS pos;
 			std::tie(node, indent, pos) = top;
@@ -53,6 +53,11 @@ void display(BinTree<T> &x) {
 			}
 		}
 	}
+}
+
+template <class T>
+void display(BinTree<T> &x) {
+	display(x.root());
 }
 
 template <class T, class Node>
